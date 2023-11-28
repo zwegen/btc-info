@@ -34,4 +34,4 @@ This code implements a graphical user interface (GUI) to retrieve and display Bi
 
 ## Authors
 
-- [zwegen]
+- zwegen
