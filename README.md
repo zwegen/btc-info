@@ -39,4 +39,5 @@ This code implements a graphical user interface (GUI) to retrieve and display Bi
 ## Screenshot
 
   ![Main window](https://github.com/zwegen/btc-info/blob/main/screenshots/screenshot-01.png?raw=true)
+  ![Main window](https://github.com/zwegen/btc-info/blob/main/screenshots/0.3.79.png?raw=true)
 
