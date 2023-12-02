@@ -234,7 +234,7 @@ class HelpMenu:
         about_dialog.set_logo(GdkPixbuf.Pixbuf.new_from_file_at_size(self.icon_path, 256, 256))
 
         about_dialog.set_program_name("Bitcoin Info")
-        about_dialog.set_version("0.3.71")
+        about_dialog.set_version("0.3.79")
         about_dialog.set_authors(["Zwegen"])
         about_dialog.set_website("https://coinos.io/qr/btc-info%40coinos.io")
         about_dialog.set_website_label("Donation (sats)")
