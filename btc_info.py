@@ -16,17 +16,17 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
 class BitcoinInfo:
-    """Diese Klasse repräsentiert eine Schnittstelle zur Abfrage von Bitcoin-Informationen."""
+    """Interface for querying Bitcoin information."""
 
     def __init__(self, currency_code):
-        """Initialisiert die BitcoinInfo-Klasse mit einer Währungscode-Option."""
+        """Initializes the BitcoinInfo class with a currency code option."""
         self.currency_code = currency_code
         self.selected_currency = "EUR"  # Standardwährung
         self.base_currency = "BTC"  # Basiskryptowährung für Wechselkurse
         self.update_url()  # Aktualisiert die URLs basierend auf den aktuellen Werten
 
     def update_url(self):
-        """Aktualisiert die URLs basierend auf der Basiswährung und der ausgewählten Währung."""
+        """Updates the URLs based on the base currency and the selected currency."""
         self.url = (
         f"https://api.coinbase.com/v2/prices/{self.base_currency}-{self.currency_code}/buy"
         )
@@ -44,16 +44,16 @@ class BitcoinInfo:
         )
 
     def add_commas(self, number):
-        """Fügt Tausendertrennzeichen zu Zahlen hinzu (für bessere Lesbarkeit)."""
-        return f"{number:11,.0f}"
+        """Adds thousands separators to numbers."""
+        return f"{number:11,.0f}".replace(',', '.')
 
     def get_data(self, url):
-        """Holt Daten von der angegebenen URL."""
+        """Retrieves data from the specified URL."""
         with requests.get(url, timeout=10) as response:
             return response.text
 
     def get_bitcoin_price(self):
-        """Holt Daten von APIs in parallelen Threads und gibt formatierte Informationen zurück."""
+        """Retrieves data from APIs in parallel threads and returns formatted information."""
         urls = [self.url, self.url_block, self.fee, self.hashrate, self.unconf_tx]
         with ThreadPoolExecutor(max_workers=6) as executor:
             responses = list(executor.map(self.get_data, urls))
@@ -61,7 +61,7 @@ class BitcoinInfo:
         # Überprüfen Sie den Erfolg der API-Aufrufe
         for response in responses:
             if not response:
-                return "Fehler beim Abrufen von Daten von einer der APIs."
+                return "Error retrieving data from one of the APIs."
 
         # Verarbeiten Sie die erhaltenen Daten
         block = json.loads(responses[1])
@@ -101,29 +101,35 @@ class BitcoinInfo:
 
 
 class CurrencyMenu:
-    """Diese Klasse repräsentiert das Währungsmenü."""
+    """This class represents the currency menu."""
 
     currencies = {
-        "Euro": "EUR",
+        "EU Euro": "EUR",
         "US Dollar": "USD",
+        "Russian Ruble": "RUB",
+        "Chinese Yuan": "CNY",
+        "Japanese Yen": "JPY",
         "Canadian Dollar": "CAD",
         "Australian Dollar": "AUD",
         "Swiss Franc":"CHF",
         "British Pound": "GBP",
-        "Russian Ruble": "RUB",
         "Brazilian Real": "BRL",
+        "Argentine Peso": "ARS",
+        "Norwegian Krone": "NOK",
         "Hungary Forint": "HUF",
+        "Mexican Peso":"MXN",
         "Turkish Lira": "TRY",
-        "Polish Zloty": "PLN"
+        "South Korean Won": "KRW",
+        "Polish Zloty": "PLN",
     }
 
     def __init__(self, callback):
-        """Initialisiert das Währungsmenü mit einem Rückruf."""
+        """Initializes the currency menu with a callback."""
         self.currency_menu = Gtk.Menu()
         group = None
 
         for currency, currency_code in self.currencies.items():
-            item = Gtk.RadioMenuItem.new_with_label(group, currency_code)
+            item = Gtk.RadioMenuItem.new_with_label(group, currency)
             item.connect("activate", callback, currency, currency_code)
             group = item.get_group()
             self.currency_menu.append(item)
@@ -134,7 +140,7 @@ class CurrencyMenu:
 
 
 class IntervalMenu:
-    """Diese Klasse repräsentiert das Intervallmenü."""
+    """This class represents the interval menu."""
 
     default_interval = 60
 
@@ -149,7 +155,7 @@ class IntervalMenu:
     }
 
     def __init__(self, callback):
-        """Initialisiert das Intervallmenü mit einem Rückruf."""
+        """Initializes the interval menu with a callback."""
         self.interval_menu = Gtk.Menu()
         group = None
 
@@ -167,15 +173,15 @@ class IntervalMenu:
 
 
 class HelpMenu:
-    """Diese Klasse repräsentiert das Hilfe-Menü."""
+    """This class represents the help menu."""
 
     def __init__(self, icon_path):
-        """Initialisiert das HelpMenu mit einem Pfad zum Icon."""
+        """Initializes the HelpMenu with a path to the icon."""
         self.icon_path = icon_path
         self.help_menu_item = self.create_help_menu()
 
     def create_help_menu(self):
-        """Erstellt das Hilfe-Menü."""
+        """Creates the help menu."""
         help_menu = Gtk.Menu()
 
         help_menu_item = Gtk.ImageMenuItem.new_with_label("")
@@ -193,12 +199,12 @@ class HelpMenu:
         return help_menu_item
 
     def on_help_menu_click(self, widget, event):
-        """Zeigt das Über-Dialogfeld an, wenn auf das Hilfe-Menü geklickt wird."""
+        """Displays the About dialog box when the Help menu is clicked."""
         if event.type == Gdk.EventType.BUTTON_PRESS and event.button == 1:
             self.show_about_dialog(widget)
 
     def show_about_dialog(self, widget):
-        """Zeigt das Über-Dialogfeld an."""
+        """Displays the About dialog box."""
         about_dialog = Gtk.AboutDialog()
 
         # Setzen Sie das Icon für den Über-Dialog
@@ -216,10 +222,10 @@ class HelpMenu:
 
 
 class MyWindow(Gtk.Window):
-    """Diese Klasse repräsentiert das Hauptfenster der Anwendung."""
+    """This class represents the main window of the application."""
 
     def __init__(self):
-        """Initialisiert das Hauptfenster der Anwendung."""
+        """Initializes the main window of the application."""
         Gtk.Window.__init__(self, title="Bitcoin Info")
         self.currency = "EUR"
         self.set_icon_from_file("/usr/share/btc-info/btc-info.png")
@@ -247,14 +253,14 @@ class MyWindow(Gtk.Window):
         self.show_all()
 
     def run_script(self):
-        """Führt das Skript aus und gibt die Ausgabe zurück."""
+        """Executes the script and returns the output."""
         output = self.bitcoin_info.get_bitcoin_price()
         print(f"Output from run_script:\n{output}")
         print("Script execution completed.")
         return output
 
     def update_textview(self, output):
-        """Aktualisiert die Textansicht mit der angegebenen Ausgabe."""
+        """Refreshes the text view with the specified output."""
         self.textbuffer.set_text("")
         end_iter = self.textbuffer.get_end_iter()
         self.textbuffer.insert(end_iter, output)
@@ -263,13 +269,13 @@ class MyWindow(Gtk.Window):
         adj.set_value(adj.get_upper() - adj.get_page_size())
 
     def on_auto_refresh(self):
-        """Auto-Refresh durch Skriptausführung, Aktualisiert Textansicht und gibt True zurück."""
+        """Auto-refresh by script execution, updates text view and returns true."""
         output = self.run_script()
         self.update_textview(output)
         return True
 
-    def on_update_interval(self, menu_item, seconds):
-        """Behandelt die Änderung des Aktualisierungsintervalls."""
+    def on_update_interval(self, seconds):
+        """Handles the change to the update interval."""
         self.update_interval_seconds = seconds
         self.refresh_counter = 0
         GLib.source_remove(self.timeout_id)
@@ -279,7 +285,7 @@ class MyWindow(Gtk.Window):
         self.on_auto_refresh()
 
     def on_currency_change(self, widget, label, currency_code):
-        """Behandelt die Änderung der Währung."""
+        """Deals with the change in currency."""
         print(f"Currency changed to {label} ({currency_code})")
         self.currency = currency_code
         self.bitcoin_info.currency_code = currency_code
@@ -294,13 +300,13 @@ class MyWindow(Gtk.Window):
         self.update_textview(self.run_script())
 
     def on_refresh(self, widget):
-        """Behandelt den Klick auf den Refresh-Button."""
+        """Handles the click on the refresh button."""
         print("Refresh button clicked")
         output = self.run_script()
         self.update_textview(output)
 
     def setup_currency_menu(self):
-        """Setzt das Währungsmenü auf."""
+        """Sets up the currency menu."""
         self.currency_menu = CurrencyMenu(self.on_currency_change)
 
         # Currency Menu (Icon: institution)
@@ -308,7 +314,7 @@ class MyWindow(Gtk.Window):
         self.menubar.append(currency_menu_item)
 
     def setup_interval_menu(self):
-        """Setzt das Intervallmenü auf."""
+        """Sets the interval menu."""
         self.interval_menu = IntervalMenu(self.on_update_interval)
 
         # Interval Menu (Icon: history)
@@ -316,7 +322,7 @@ class MyWindow(Gtk.Window):
         self.menubar.append(interval_menu_item)
 
     def setup_refresh_button(self):
-        """Setzt den Refresh-Button auf."""
+        """Sets the refresh button."""
         # Refresh Menu (Icon: reload)
         refresh_menuitem = Gtk.MenuItem()
         refresh_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
@@ -329,13 +335,13 @@ class MyWindow(Gtk.Window):
         self.menubar.append(refresh_menuitem)
 
     def setup_help_menu(self):
-        """Setzt das Hilfe-Menü auf."""
+        """Opens the help menu."""
         help_menu = HelpMenu(self.icon_path)
         help_menu_item = help_menu.help_menu_item
         self.menubar.append(help_menu_item)
 
     def setup_ui(self):
-        """Setzt die Benutzeroberfläche auf."""
+        """Sets up the user interface."""
         main_box = Gtk.VBox()
         self.add(main_box)
 
@@ -359,4 +365,3 @@ class MyWindow(Gtk.Window):
 if __name__ == "__main__":
     win = MyWindow()
     Gtk.main()
-
