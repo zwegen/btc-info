@@ -43,22 +43,7 @@ class BitcoinInfo:
         "https://mempool.space/api/mempool"
         )
 
-    def get_blockchair_data(self):
-        url = "https://api.blockchair.com/bitcoin/stats"
-        try:
-            data = requests.get(url).json()
-            suggested_fee_per_byte = data["data"]["suggested_transaction_fee_per_byte_sat"]
-            return suggested_fee_per_byte
-        except requests.RequestException as req_exc:
-            print(f"Error retrieving data from Blockchair: {req_exc}")
-        except KeyError as key_error:
-            print(f"Error extracting data from Blockchair: {key_error}")
-        except json.JSONDecodeError as json_error:
-            print(f"Error decoding JSON data from Blockchair: {json_error}")
-        except Exception as e:
-            print(f"General error retrieving data from Blockchair: {e}")
 
-        return None
 
     def add_commas(self, number):
         """Fügt Tausendertrennzeichen zu Zahlen hinzu (für bessere Lesbarkeit)."""
@@ -84,8 +69,6 @@ class BitcoinInfo:
             if not response:
                 return "Fehler beim Abrufen von Daten von einer der APIs."
 
-        # Füge den Aufruf für Blockchair Daten hinzu
-        suggested_fee_per_byte = self.get_blockchair_data()
 
         # Verarbeiten Sie die erhaltenen Daten
         block = json.loads(responses[1])
@@ -98,7 +81,6 @@ class BitcoinInfo:
         hour_fee = fees_data['hourFee']
         half_hour_fee = fees_data['halfHourFee']
         fastest_fee = fees_data['fastestFee']
-
         price_str = price_data['data']['amount']
         price = float(price_str.replace(',', ''))
 
@@ -114,7 +96,6 @@ class BitcoinInfo:
         output += f"Low Fee       :{self.add_fees(hour_fee)} sat\n"
         output += f"Medium Fee    :{self.add_fees(half_hour_fee)} sat\n"
         output += f"High Fee      :{self.add_fees(fastest_fee)} sat\n\n"
-        output += f"Suggested Fee :{self.add_fees(suggested_fee_per_byte)} sat\n\n"
         output += f"Block Height  :{self.add_commas(int(block))}\n"
         output += f"Hashrate (PH) :{self.add_commas(hashrate_ehs)}\n"
         output += f"Unconfirmed   :{self.add_commas(utx)}"
@@ -158,7 +139,7 @@ class CurrencyMenu:
             self.currency_menu.append(item)
 
         self.currency_menu_item = Gtk.ImageMenuItem.new_with_label("")
-        self.currency_menu_item.set_image(Gtk.Image.new_from_icon_name("globe", Gtk.IconSize.MENU))
+        self.currency_menu_item.set_image(Gtk.Image.new_from_icon_name("mark-location-symbolic", Gtk.IconSize.MENU))
         self.currency_menu_item.set_submenu(self.currency_menu)
 
 
@@ -190,7 +171,7 @@ class IntervalMenu:
 
         self.interval_menu_item = Gtk.ImageMenuItem.new_with_label("")
         self.interval_menu_item.set_image(Gtk.Image.new_from_icon_name(
-        "chronometer", Gtk.IconSize.MENU
+        "document-open-recent-symbolic", Gtk.IconSize.MENU
         ))
         self.interval_menu_item.set_submenu(self.interval_menu)
 
@@ -209,7 +190,7 @@ class HelpMenu:
 
         help_menu_item = Gtk.ImageMenuItem.new_with_label("")
         help_menu_item.set_image(Gtk.Image.new_from_icon_name(
-        "help-about", Gtk.IconSize.MENU
+        "help-about-symbolic", Gtk.IconSize.MENU
         ))
         help_menu_item.set_submenu(help_menu)
 
@@ -350,7 +331,7 @@ class MyWindow(Gtk.Window):
         refresh_menuitem = Gtk.MenuItem()
         refresh_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         refresh_box.pack_start(Gtk.Image.new_from_icon_name(
-        "reload", Gtk.IconSize.MENU), False, False, 0
+        "view-refresh-symbolic", Gtk.IconSize.MENU), False, False, 0
         )
         refresh_box.pack_start(Gtk.Label(label=""), False, False, 0)
         refresh_menuitem.add(refresh_box)
